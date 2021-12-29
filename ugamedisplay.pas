@@ -68,22 +68,42 @@ begin
       begin
         // Welche Taste wurde gedrueckt; jeweils verschiedene Dinge tun
         case (event^.key.keysym.sym) of
-        SDLK_d : player.setVelocityX(1);
-        SDLK_a : player.setVelocityX(-1);
-        SDLK_w : player.setVelocityY(-1);
-        SDLK_s : player.setVelocityY(1);
+        SDLK_d : player.setMovementTowards(DIR_RIGHT, true);
+        SDLK_a : player.setMovementTowards(DIR_LEFT, true);
+        SDLK_w : player.setMovementTowards(DIR_TOP, true);
+        SDLK_s : player.setMovementTowards(DIR_BOTTOM, true);
         SDLK_ESCAPE : running := false;
       end;
       end
       else if event^.type_ = SDL_KEYUP then
       begin
         case (event^.key.keysym.sym) of
-        SDLK_d, SDLK_a : player.setVelocityX(0);
-        SDLK_w, SDLK_s : player.setVelocityY(0);
+        SDLK_d: player.setMovementTowards(DIR_RIGHT, false);
+        SDLK_a: player.setMovementTowards(DIR_LEFT, false);
+        SDLK_w: player.setMovementTowards(DIR_TOP, false);
+        SDLK_s: player.setMovementTowards(DIR_BOTTOM, false);
         end;
       end;
     end;
-    player.move(player.getVelocityX * player.getSpeed, player.getVelocityY * player.getSpeed);
+
+    if (player.getMovementTowards(DIR_TOP)) then
+    begin
+      player.move(0, -1 * player.getSpeed);
+    end;
+    if (player.getMovementTowards(DIR_RIGHT)) then
+    begin
+      player.move(player.getSpeed, 0);
+    end;
+    if (player.getMovementTowards(DIR_BOTTOM)) then
+    begin
+      player.move(0, player.getSpeed);
+    end;
+    if (player.getMovementTowards(DIR_LEFT)) then
+    begin
+      player.move(-1 * player.getSpeed, 0);
+    end;
+    //player.move(integer(player.getMovementTowards(DIR_BOTTOM)) * player.getSpeed, integer(player.getMovementTowards(DIR_RIGHT)) * player.getSpeed);
+    //player.move(-1 * integer(player.getMovementTowards(DIR_TOP)) * player.getSpeed, -1 * integer(player.getMovementTowards(DIR_LEFT)) * player.getSpeed);
 
     // Rendering
     // Sollte spaeter wahrscheinlich durch einen Loop ersetzt werden.
