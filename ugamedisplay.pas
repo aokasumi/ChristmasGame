@@ -68,42 +68,35 @@ begin
       begin
         // Welche Taste wurde gedrueckt; jeweils verschiedene Dinge tun
         case (event^.key.keysym.sym) of
-        SDLK_d : player.setMovementTowards(DIR_RIGHT, true);
-        SDLK_a : player.setMovementTowards(DIR_LEFT, true);
-        SDLK_w : player.setMovementTowards(DIR_TOP, true);
-        SDLK_s : player.setMovementTowards(DIR_BOTTOM, true);
+        SDLK_d : player.setMovementTowards(DIR_RIGHT, 1);
+        SDLK_a : player.setMovementTowards(DIR_LEFT, 1);
+        SDLK_w : player.setMovementTowards(DIR_TOP, 3);
+        //SDLK_s : player.setMovementTowards(DIR_BOTTOM, 1);
         SDLK_ESCAPE : running := false;
       end;
       end
       else if event^.type_ = SDL_KEYUP then
       begin
         case (event^.key.keysym.sym) of
-        SDLK_d: player.setMovementTowards(DIR_RIGHT, false);
-        SDLK_a: player.setMovementTowards(DIR_LEFT, false);
-        SDLK_w: player.setMovementTowards(DIR_TOP, false);
-        SDLK_s: player.setMovementTowards(DIR_BOTTOM, false);
+        SDLK_d: player.setMovementTowards(DIR_RIGHT, 0);
+        SDLK_a: player.setMovementTowards(DIR_LEFT, 0);
+        SDLK_w: player.setMovementTowards(DIR_TOP, 0);
+        //SDLK_s: player.setMovementTowards(DIR_BOTTOM, 0);
         end;
       end;
     end;
 
-    if (player.getMovementTowards(DIR_TOP)) then
+    if player.getPosY < 600 then
     begin
-      player.move(0, -1 * player.getSpeed);
-    end;
-    if (player.getMovementTowards(DIR_RIGHT)) then
+       player.setMovementTowards(DIR_BOTTOM, 1);
+    end
+    else
     begin
-      player.move(player.getSpeed, 0);
+      player.setMovementTowards(DIR_BOTTOM, 0);
     end;
-    if (player.getMovementTowards(DIR_BOTTOM)) then
-    begin
-      player.move(0, player.getSpeed);
-    end;
-    if (player.getMovementTowards(DIR_LEFT)) then
-    begin
-      player.move(-1 * player.getSpeed, 0);
-    end;
-    //player.move(integer(player.getMovementTowards(DIR_BOTTOM)) * player.getSpeed, integer(player.getMovementTowards(DIR_RIGHT)) * player.getSpeed);
-    //player.move(-1 * integer(player.getMovementTowards(DIR_TOP)) * player.getSpeed, -1 * integer(player.getMovementTowards(DIR_LEFT)) * player.getSpeed);
+
+    player.move(player.getMovementTowards(DIR_RIGHT) * player.getSpeed, player.getMovementTowards(DIR_BOTTOM) * player.getSpeed);
+    player.move(-1 * player.getMovementTowards(DIR_LEFT) * player.getSpeed, -1 * player.getMovementTowards(DIR_TOP) * player.getSpeed);
 
     // Rendering
     // Sollte spaeter wahrscheinlich durch einen Loop ersetzt werden.

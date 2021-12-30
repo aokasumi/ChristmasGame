@@ -19,7 +19,7 @@ type
       posX: integer;
       posY: integer;
       speed: integer;
-      movement: array [0..3] of boolean;  // top, right, left, bottom; Werte sollten immer entweder 0 oder 1 sein
+      movement: array [0..3] of integer;  // top, right, left, bottom; Werte sollten immer entweder 0 oder 1 sein
     public
       constructor create(nm: string; maxHealth: integer; spd: integer);
       procedure changeHP(value: integer);
@@ -30,8 +30,8 @@ type
       function getPosY(): integer;
       function getSpeed(): integer;
       procedure setSpeed(value: integer);
-      function getMovementTowards(dir: direction): boolean;
-      procedure setMovementTowards(dir: direction; value: boolean);
+      function getMovementTowards(dir: direction): integer;
+      procedure setMovementTowards(dir: direction; value: integer);
   end;
 
 implementation
@@ -94,12 +94,12 @@ begin
   speed := value;
 end;
 
-function TEntity.getMovementTowards(dir: direction): boolean;
+function TEntity.getMovementTowards(dir: direction): integer;
 begin
   Result := movement[integer(dir)];
 end;
 
-procedure TEntity.setMovementTowards(dir: direction; value: boolean);
+procedure TEntity.setMovementTowards(dir: direction; value: integer);
 begin
   movement[integer(dir)] := value;
 end;
