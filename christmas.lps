@@ -17,8 +17,7 @@
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="84"/>
-        <CursorPos X="10" Y="104"/>
+        <CursorPos X="47" Y="42"/>
         <UsageCount Value="37"/>
         <Loaded Value="True"/>
       </Unit1>
@@ -175,8 +174,8 @@
         <Caret Line="104" Column="24" TopLine="69"/>
       </Position24>
       <Position25>
-        <Filename Value="uentity.pas"/>
-        <Caret Line="33" Column="59" TopLine="37"/>
+        <Filename Value="ugamedisplay.pas"/>
+        <Caret Line="104" Column="10" TopLine="79"/>
       </Position25>
     </JumpHistory>
     <RunParams>
