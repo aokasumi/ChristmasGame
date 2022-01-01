@@ -48,6 +48,7 @@ var
   running: boolean;
   loopStart, loopEnd: integer;
   elapsedMilli: double;
+  jumpMilli: double;
 begin
   if has_error <> 0 then halt;
 
@@ -70,7 +71,14 @@ begin
         case (event^.key.keysym.sym) of
         SDLK_d : player.setMovementTowards(DIR_RIGHT, 1);
         SDLK_a : player.setMovementTowards(DIR_LEFT, 1);
-        SDLK_w : player.setMovementTowards(DIR_TOP, 3);
+        SDLK_SPACE:
+        begin
+          if player.getPosY = 600 then
+          begin
+             jumpMilli := 0;
+             player.setMovementTowards(DIR_TOP, 12);
+          end;
+        end;
         //SDLK_s : player.setMovementTowards(DIR_BOTTOM, 1);
         SDLK_ESCAPE : running := false;
       end;
@@ -80,7 +88,7 @@ begin
         case (event^.key.keysym.sym) of
         SDLK_d: player.setMovementTowards(DIR_RIGHT, 0);
         SDLK_a: player.setMovementTowards(DIR_LEFT, 0);
-        SDLK_w: player.setMovementTowards(DIR_TOP, 0);
+        //SDLK_w: player.setMovementTowards(DIR_TOP, 0);
         //SDLK_s: player.setMovementTowards(DIR_BOTTOM, 0);
         end;
       end;
@@ -88,15 +96,23 @@ begin
 
     if player.getPosY < 600 then
     begin
-       player.setMovementTowards(DIR_BOTTOM, 1);
+       player.setMovementTowards(DIR_BOTTOM, 4);
     end
     else
     begin
       player.setMovementTowards(DIR_BOTTOM, 0);
     end;
 
-    player.move(player.getMovementTowards(DIR_RIGHT) * player.getSpeed, player.getMovementTowards(DIR_BOTTOM) * player.getSpeed);
-    player.move(-1 * player.getMovementTowards(DIR_LEFT) * player.getSpeed, -1 * player.getMovementTowards(DIR_TOP) * player.getSpeed);
+    if jumpMilli > 500 then
+    begin
+      writeln('bumms');
+      player.setMovementTowards(DIR_TOP, 0);
+      jumpMilli := 0;
+    end;
+
+    // Aenderung hier: Schwerkraft soll nicht von speed des Spielers abhaengen
+    player.move(player.getMovementTowards(DIR_RIGHT) * player.getSpeed, player.getMovementTowards(DIR_BOTTOM));
+    player.move(-1 * player.getMovementTowards(DIR_LEFT) * player.getSpeed, -1 * player.getMovementTowards(DIR_TOP));
 
     // Rendering
     // Sollte spaeter wahrscheinlich durch einen Loop ersetzt werden.
@@ -111,6 +127,7 @@ begin
     // wird auf Sekunde gebracht mit Teilen durch SDL_GetPerformanceFrequency()
     // und dann auf Millisekunden zurueckkonvertiert durch * 1000
     elapsedMilli := (loopEnd - loopStart) / SDL_GetPerformanceFrequency() * 1000.0;
+    jumpMilli := jumpMilli + (16.666 - elapsedMilli);
     SDL_Delay(Floor(16.6666 - elapsedMilli));
     writeln('Elapsed: ' + IntToStr(Floor(16.6666 - elapsedMilli)));
   end;
