@@ -5,7 +5,7 @@ unit ugamedisplay;
 interface
 
 uses
-  Classes, SysUtils, Math, SDL2, SDL2_Image, UEntity, UEntityDisplay;
+  Classes, SysUtils, Math, SDL2, UEntity, UEntityDisplay;
 
 type
   TGameDisplay = class
@@ -17,6 +17,7 @@ type
       mainViewport: TSDL_Rect;
       player: TEntity;
       playerDisplay: TEntityDisplay;
+      procedure KeepInBounds();
     public
       constructor create();
       procedure show();
@@ -46,16 +47,25 @@ end;
 procedure TGameDisplay.show();
 var
   running: boolean;
-  loopStart, loopEnd: integer;
+  loopStart, loopEnd, velocityStepEnd: integer;
   elapsedMilli: double;
-  jumpMilli: double;
+  dt: double;
+  gravity, sideForce: integer;
+  d_pressed, a_pressed: boolean;
+  wasOutY, wasOutX: boolean;
 begin
   if has_error <> 0 then halt;
+
+  gravity := -10000000;
+  wasOutY := false; wasOutX := false;
+  a_pressed := false; d_pressed := false;
 
   running := true;
   while running do
   begin
     loopStart := SDL_GetPerformanceCounter();
+    velocityStepEnd := SDL_GetPerformanceCounter();
+    dt := (velocityStepEnd - loopStart) / SDL_GetPerformanceFrequency() * 1000;
     // Main Viewport clearen
     SDL_RenderSetViewport(renderer, @mainViewport);
     SDL_SetRenderDrawColor(renderer, 0, 170, 85, 255);
@@ -69,14 +79,14 @@ begin
       begin
         // Welche Taste wurde gedrueckt; jeweils verschiedene Dinge tun
         case (event^.key.keysym.sym) of
-        SDLK_d : player.setMovementTowards(DIR_RIGHT, 1);
-        SDLK_a : player.setMovementTowards(DIR_LEFT, 1);
+        SDLK_d : d_pressed := true;
+        SDLK_a : a_pressed := true;
         SDLK_SPACE:
         begin
-          if player.getPosY = 600 then
+          // Zahl etwas hoeher, weil es so intuitiver ist.
+          if player.getPosY >= 726 then
           begin
-             jumpMilli := 0;
-             player.setMovementTowards(DIR_TOP, 12);
+            player.setVelocityY(60000);
           end;
         end;
         //SDLK_s : player.setMovementTowards(DIR_BOTTOM, 1);
@@ -86,33 +96,36 @@ begin
       else if event^.type_ = SDL_KEYUP then
       begin
         case (event^.key.keysym.sym) of
-        SDLK_d: player.setMovementTowards(DIR_RIGHT, 0);
-        SDLK_a: player.setMovementTowards(DIR_LEFT, 0);
+        SDLK_d: d_pressed := false;
+        SDLK_a: a_pressed := false;
         //SDLK_w: player.setMovementTowards(DIR_TOP, 0);
         //SDLK_s: player.setMovementTowards(DIR_BOTTOM, 0);
         end;
       end;
     end;
 
-    if player.getPosY < 600 then
+    // Move in Y-Direction for jumping
+    player.move(0, -1 * Floor(player.getVelocityY * dt));
+    player.setVelocityY(player.getVelocityY + Floor(gravity * dt));
+
+    // Herausfinden, welche Kombinationen von a und d gepresst sind, fuer Bewegung in Richtung x.
+    if d_pressed then
     begin
-       player.setMovementTowards(DIR_BOTTOM, 4);
-    end
-    else
+      player.setVelocityX(1);
+    end;
+    if a_pressed then
     begin
-      player.setMovementTowards(DIR_BOTTOM, 0);
+      player.setVelocityX(-1);
+    end;
+    if (d_pressed and a_pressed) or (not(d_pressed) and not(a_pressed)) then
+    begin
+      player.setVelocityX(0);
     end;
 
-    if jumpMilli > 500 then
-    begin
-      writeln('bumms');
-      player.setMovementTowards(DIR_TOP, 0);
-      jumpMilli := 0;
-    end;
+    KeepInBounds();
 
-    // Aenderung hier: Schwerkraft soll nicht von speed des Spielers abhaengen
-    player.move(player.getMovementTowards(DIR_RIGHT) * player.getSpeed, player.getMovementTowards(DIR_BOTTOM));
-    player.move(-1 * player.getMovementTowards(DIR_LEFT) * player.getSpeed, -1 * player.getMovementTowards(DIR_TOP));
+    // Bewegung in X-Richtung
+    player.move(player.getVelocityX * player.getSpeed, 0);
 
     // Rendering
     // Sollte spaeter wahrscheinlich durch einen Loop ersetzt werden.
@@ -127,9 +140,32 @@ begin
     // wird auf Sekunde gebracht mit Teilen durch SDL_GetPerformanceFrequency()
     // und dann auf Millisekunden zurueckkonvertiert durch * 1000
     elapsedMilli := (loopEnd - loopStart) / SDL_GetPerformanceFrequency() * 1000.0;
-    jumpMilli := jumpMilli + (16.666 - elapsedMilli);
     SDL_Delay(Floor(16.6666 - elapsedMilli));
     writeln('Elapsed: ' + IntToStr(Floor(16.6666 - elapsedMilli)));
+  end;
+end;
+
+procedure TGameDisplay.KeepInBounds();
+begin
+  if player.getPosX >= 968 then
+  begin
+    player.setPos(968, player.getPosY);
+    player.setVelocityX(-1 * player.getVelocityX);
+  end
+  else if player.getPosX <= 0 then
+  begin
+    player.setPos(0, player.getPosY);
+    player.setVelocityX(-1 * player.getVelocityX);
+  end;
+  if player.getPosY <= 0 then
+  begin
+    player.setPos(player.getPosX, 0);
+    player.setVelocityY(-1 * player.getVelocityY);
+  end
+  else if player.getPosY >= 736 then
+  begin
+    player.setPos(player.getPosX, 736);
+    player.setVelocityY(0);
   end;
 end;
 

@@ -8,8 +8,6 @@ uses
   Classes, SysUtils;
 
 type
-  direction = (DIR_TOP=0, DIR_RIGHT, DIR_BOTTOM, DIR_LEFT);
-
   { TEntity }
   TEntity = class
     strict private
@@ -19,7 +17,7 @@ type
       posX: integer;
       posY: integer;
       speed: integer;
-      movement: array [0..3] of integer;  // top, right, left, bottom; Werte sollten immer entweder 0 oder 1 sein
+      velocity: array [0..1] of integer;
     public
       constructor create(nm: string; maxHealth: integer; spd: integer);
       procedure changeHP(value: integer);
@@ -30,8 +28,10 @@ type
       function getPosY(): integer;
       function getSpeed(): integer;
       procedure setSpeed(value: integer);
-      function getMovementTowards(dir: direction): integer;
-      procedure setMovementTowards(dir: direction; value: integer);
+      function getVelocityX(): integer;
+      procedure setVelocityX(value: integer);
+      function getVelocityY(): integer;
+      procedure setVelocityY(value: integer);
   end;
 
 implementation
@@ -94,14 +94,24 @@ begin
   speed := value;
 end;
 
-function TEntity.getMovementTowards(dir: direction): integer;
+function TEntity.getVelocityX(): integer;
 begin
-  Result := movement[integer(dir)];
+  Result := velocity[0];
 end;
 
-procedure TEntity.setMovementTowards(dir: direction; value: integer);
+procedure TEntity.setVelocityX(value: integer);
 begin
-  movement[integer(dir)] := value;
+  velocity[0] := value;
+end;
+
+function TEntity.getVelocityY(): integer;
+begin
+  Result := velocity[1];
+end;
+
+procedure TEntity.setVelocityY(value: integer);
+begin
+  velocity[1] := value;
 end;
 
 end.
